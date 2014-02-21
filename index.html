@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+    body {
+        margin-top: 60px;
+    }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">IP Address</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="ip-address" class="form-control ip" placeholder="IP Address">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Subnet Mask</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="subnet-mask" class="form-control ip" placeholder="Subnet Mask">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-default">Calcular Rede e Broadcast</button>
+                        </div>
+                    </div>
+                </form>
+                <div id="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/handlebars-v1.3.0.js"></script>
+    <script src="js/jquery.mask.min.js"></script>
+    <script id="template-result" type="text/x-handlebars-template">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <td>#</td>
+                    <td>Rede</td>
+                    <td>Broadcast</td>
+                    <td>IP</td>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each this}}
+                <tr>
+                    <td></td>
+                    <td>{{ this.rede }}</td>
+                    <td>{{ this.broadcast }}</td>
+                    <td>{{ this.ip }}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </script>
+
+
+    <script>
+
+    $(function() {
+
+        // Aplica uma máscara para os campos do tipo ip
+        $('.ip').mask('099.099.099.099');
+
+        $('button[type=submit]').on('click', function(e) {
+
+            e.preventDefault();
+
+            var ip_address = $('#ip-address').val(),
+                subnet_mask = $('#subnet-mask').val(),
+                end_mask = subnet_mask.split('.')[3],
+                end_ip = ip_address.split('.')[3],
+                numero_elementos = (256 - end_mask),
+                redes = [],
+                ip = false,
+                broadcast = 0;
+
+            for (i = 0; i < 256; i += numero_elementos) {
+
+                broadcast = (i + numero_elementos) - 1;
+
+                ip = false;
+
+                if (end_ip > i && end_ip < broadcast) {
+                    ip = true;
+                }
+                redes.push({
+                    rede: i,
+                    broadcast: (i + numero_elementos) - 1,
+                    ip: ip
+                });
+            }
+            var source = $('#template-result').html(),
+                template = Handlebars.compile(source);
+            $('#result').append(template(redes));
+        });
+    });
+
+    </script>
+
+</body>
+</html>
