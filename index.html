@@ -76,8 +76,6 @@
             </tbody>
         </table>
     </script>
-
-
     <script>
 
     $(function() {
@@ -85,12 +83,14 @@
         // Aplica uma máscara para os campos do tipo ip
         $('.ip').mask('099.099.099.099');
 
-        $('button[type=submit]').on('click', function(e) {
+        var $button = document.querySelector('button[type=submit]');
+
+        $button.addEventListener('click', function(e) {
 
             e.preventDefault();
 
-            var ip_address = $('#ip-address').val(),
-                subnet_mask = $('#subnet-mask').val(),
+            var ip_address = document.querySelector('#ip-address').value,
+                subnet_mask = document.querySelector('#subnet-mask').value,
                 end_mask = subnet_mask.split('.')[3],
                 end_ip = ip_address.split('.')[3],
                 numero_elementos = (256 - end_mask),
@@ -105,8 +105,9 @@
                 ip = false;
 
                 if (end_ip > i && end_ip < broadcast) {
-                    ip = true;
+                    ip = ip_address;
                 }
+
                 redes.push({
                     rede: i,
                     broadcast: (i + numero_elementos) - 1,
