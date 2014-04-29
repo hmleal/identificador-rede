@@ -34,9 +34,18 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-2 control-label">Binary</label>
+                        <div class="col-sm-10">
+                            <div class="input-group">
+                                <span class="input-group-addon">/</span>
+                                <input type="text" id="binary" class="form-control" placeholder="Binary">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-2 control-label">Subnet Mask</label>
                         <div class="col-sm-10">
-                            <input type="text" id="subnet-mask" class="form-control ip" placeholder="Subnet Mask">
+                            <input type="text" id="subnet-mask" class="form-control ip" placeholder="Subnet Mask" readonly>
                         </div>
                     </div>
                     <div class="form-group">
@@ -83,7 +92,16 @@
         // Aplica uma máscara para os campos do tipo ip
         $('.ip').mask('099.099.099.099');
 
-        var $button = document.querySelector('button[type=submit]');
+        var $button = document.querySelector('button[type=submit]'),
+            $binary = document.querySelector('#binary');
+
+        $binary.addEventListener('change', function(e) {
+            var binaryValue = this.value,
+                wild_card = generateWildCard(binaryValue),
+                net_mask = wildCardToMask(wild_card);
+
+            document.querySelector('#subnet-mask').value = net_mask;
+        });
 
         $button.addEventListener('click', function(e) {
 
@@ -119,6 +137,54 @@
             $('#result').append(template(redes));
         });
     });
+
+    function generateWildCard(nbits) {
+        /*
+         * Recebe um int nbits monta o wild_card desse valor como string
+         */
+        var wild_card = '';
+        for (x = 0; x < 32; x++) {
+            if (x == 8 || x == 16 || x == 24) {
+                wild_card = wild_card + '.';
+            }
+
+            if (nbits >= 0) {
+                wild_card = wild_card + 1;
+                nbits--;
+            } else {
+                wild_card = wild_card + '0';
+            }
+
+        }
+        return wild_card;
+    }
+
+    function wildCardToMask(wild_card) {
+        /*
+         * Recebe um wild_card e monta a mascara de sub-rede
+         */
+        var wc = wild_card.split('.'),
+            net_mask = '';
+        for (x = 0; x < wc.length; x++) {
+            if (wc[x] === '11111111') {
+                net_mask = net_mask + '255.';
+            } else {
+                var piece = wc[x],
+                    len = piece.length - 1,
+                    pow = 0,
+                    result = 0;
+
+                for (y = len; y >= 0; y--) {
+                    if (piece[y] == '1') {
+                        result += Math.pow(2, pow);
+                    }
+                    pow++;
+                }
+                net_mask = net_mask + result + '.';
+            }
+        }
+        return net_mask.substring(0, net_mask.length - 1);
+    }
 
     </script>
 
